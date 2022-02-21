@@ -1,0 +1,26 @@
+---
+name: docker-CI
+on:
+  workflow_dispatch:
+    inputs:
+      AZURE_REGISTRY:
+        description: The registry to docker push to
+        required: true
+        type: string
+      AZURE_REPOSITORY:
+        description: The name of the repository to push to
+        required: true
+        type: string
+
+jobs:
+  docker-work:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docker build
+        run: |
+          printf "FROM alpine\nENTRYPOINT [ "bin/sh" ]" >> Dockerfile
+          docker build . -t ${AZURE_REGISTRY,,}/${AZURE_REPOSITORY,,}
+          docker login ${AZURE_REGISTRY,,} \
+          --username ${{ secrets.AZURE_TOKEN_USERNAME }} \
+          --password ${{ secrets.AZURE_TOKEN }}
+          docker push ${AZURE_REGISTRY,,}/${AZURE_REPOSITORY,,}
