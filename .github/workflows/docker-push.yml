@@ -1,20 +1,39 @@
 ---
 name: docker-CI
 on:
-  workflow_dispatch:
-    inputs:
-      AZURE_REGISTRY:
-        description: The registry to docker push to
-        required: true
-        type: string
-      AZURE_REPOSITORY:
-        description: The name of the repository to push to
-        required: true
-        type: string
+  push:
+    branches: [ main ]
+
+env:
+  AZURE_REGISTRY: flashyacr.azurecr.io
+  AZURE_REPOSITORY: ${{ github.repository }}
+  AZURE_TOKEN_NAME: ${{ github.event.repository.name }}
 
 jobs:
+  get-token-access:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: convictional/trigger-workflow-and-wait@v1.3.0
+        with:
+          owner: Flash1212
+          repo: actions-create-acr-scoped-token
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          github_user: Flash1212
+          workflow_file_name: acr-scoped-credentials.yml
+          ref: main
+          wait_interval: 10
+          inputs: |
+            '{
+                "AZURE_REPOSITORY": "${{ env.AZURE_REPOSITORY }}",
+                "AZURE_REGISTRY": "${{ env.AZURE_REGISTRY }}",
+                "AZURE_TOKEN_NAME": "${{ env.AZURE_TOKEN_NAME }}"
+            }'
+          propagate_failure: true
+          trigger_workflow: true
+          wait_workflow: true
   docker-work:
     runs-on: ubuntu-latest
+    needs: get-token-access
     steps:
       - name: Docker build
         run: |
