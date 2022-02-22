@@ -20,7 +20,7 @@ jobs:
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           workflow_file_name: acr-scoped-credentials.yaml
           ref: main
-          wait_interval: 10
+          wait_interval: 30
           inputs: '{"AZURE_REPOSITORY": "${{ env.AZURE_REPOSITORY }}", "AZURE_REGISTRY": "${{ env.AZURE_REGISTRY }}", "AZURE_TOKEN_NAME": "${{ env.AZURE_TOKEN_NAME }}"}'
           propagate_failure: true
           trigger_workflow: true
